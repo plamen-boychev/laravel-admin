@@ -2,7 +2,7 @@
     "name": "plamen-boychev/laravel-admin",
     "description": "Administration package for Laravel 5 based on php7.0",
     "require": {
-        "php": ">=7.*",
+        "php": ">=7.0",
         "cartalyst/sentinel": "2.0.*"
     },
     "autoload": {
