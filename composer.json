@@ -2,9 +2,25 @@
     "name": "plamen-boychev/laravel-admin",
     "description": "Administration package for Laravel 5 based on php7.0",
     "require": {
+        "php": ">=7.*",
         "cartalyst/sentinel": "2.0.*"
     },
+    "autoload": {
+        "psr-0": {
+            "LAdmin": "src/"
+        },
+        "files": [
+            "src/SleepingOwl/Admin/Http/helpers.php"
+        ]
+    },
     "license": "MIT",
+    "keywords": [
+        "laravel",
+        "php7",
+        "admin",
+        "administrator",
+        "crud"
+    ],
     "authors": [
         {
             "name": "Plamen Boychev",
