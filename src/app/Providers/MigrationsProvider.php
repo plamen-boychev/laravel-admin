@@ -2,22 +2,23 @@
 
 namespace LAdmin\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use Exception;
 
-class GeneralServiceProvider extends ServiceProvider
+class MigrationsProvider extends BaseProvider
 {
+
+    public function register()
+    {
+    }
+
     /**
-     * Bootstrap any application services.
+     * Publishing the resources related to the database - migration scripts,
+     * factories and seed classes
      *
      * @return void
      */
     public function boot()
     {
-        # Publishing the packages config files
-        $this->publishes([
-            __DIR__.'/../../config/ladmin.php' => config_path('ladmin.php'),
-        ], 'config');
-
         # Publishing migrations
         $this->publishes([
             __DIR__.'/../../database/migrations/' => database_path('migrations'),
@@ -34,13 +35,4 @@ class GeneralServiceProvider extends ServiceProvider
         ], 'seeds');
     }
 
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        //
-    }
 }
