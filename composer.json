@@ -8,10 +8,7 @@
     "autoload": {
         "psr-0": {
             "LAdmin": "src/"
-        },
-        "files": [
-            "src/SleepingOwl/Admin/Http/helpers.php"
-        ]
+        }
     },
     "license": "MIT",
     "keywords": [
