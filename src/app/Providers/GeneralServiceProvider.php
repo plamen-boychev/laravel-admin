@@ -1,6 +1,6 @@
 <?php
 
-namespace LAdmin;
+namespace LAdmin\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
