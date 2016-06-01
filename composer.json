@@ -1,0 +1,15 @@
+{
+    "name": "plamen-boychev/laravel-admin",
+    "description": "Administration package for Laravel 5 based on php7.0",
+    "require": {
+        "cartalyst/sentinel": "2.0.*"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Plamen Boychev",
+            "email": "plamen.boychev@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
