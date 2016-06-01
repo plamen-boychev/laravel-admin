@@ -1,8 +1,7 @@
 <?php
 
-namespace LAdmin\Data\Seeds;
+namespace LAdminSeeds;
 
-use DB;
 use Illuminate\Database\Seeder;
 
 class UsersTableSeeder extends Seeder
@@ -15,7 +14,7 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('users')->insert([
+        \DB::table('users')->insert([
             'first_name' => 'Admin',
             'last_name' => 'Admin',
             'email' => 'admin@ladmin.dev',
