@@ -1,11 +1,12 @@
 <?php
 
-namespace LAdmin;
+namespace LAdmin\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 class FormItem extends Facade
 {
+
     /**
      * Get the binding in the IoC container
      *
@@ -15,4 +16,5 @@ class FormItem extends Facade
     {
         return 'laravel-admin.form-item';
     }
+
 }

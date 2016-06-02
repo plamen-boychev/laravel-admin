@@ -1,11 +1,12 @@
 <?php
 
-namespace LAdmin;
+namespace LAdmin\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 class Table extends Facade
 {
+
     /**
      * Get the binding in the IoC container
      *
@@ -15,4 +16,5 @@ class Table extends Facade
     {
         return 'laravel-admin.table';
     }
+
 }
