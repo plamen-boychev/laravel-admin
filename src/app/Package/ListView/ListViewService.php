@@ -2,10 +2,8 @@
 
 namespace LAdmin\Package\ListView;
 
-class ListViewService
+use LAdmin\Package\ComponentFactoryComponent;
+
+class ListViewService extends ComponentFactoryComponent
 {
-    public function speak()
-    {
-        echo '<p>ListViewService : Yes, sir.</p>';
-    }
 }

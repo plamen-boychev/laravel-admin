@@ -2,10 +2,8 @@
 
 namespace LAdmin\Package\Table;
 
-class TableService
+use LAdmin\Package\ComponentFactoryComponent;
+
+class TableService extends ComponentFactoryComponent
 {
-    public function speak()
-    {
-        echo '<p>TableService : Yes, sir.</p>';
-    }
 }

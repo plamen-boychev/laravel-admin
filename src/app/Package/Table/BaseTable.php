@@ -2,7 +2,17 @@
 
 namespace LAdmin\Package\Table;
 
-abstract class BaseTable implements TableInterface
+use LAdmin\Package\PrintableInterface;
+
+abstract class BaseTable implements TableInterface, PrintableInterface
 {
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __toString() : String
+    {
+        throw new \Exception('@todo Implement!');
+    }
 
 }

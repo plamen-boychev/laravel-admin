@@ -2,10 +2,8 @@
 
 namespace LAdmin\Package\ListColumn;
 
-class ListColumnService
+use LAdmin\Package\ComponentFactoryComponent;
+
+class ListColumnService extends ComponentFactoryComponent
 {
-    public function speak()
-    {
-        echo '<p>ListColumnService : Yes, sir.</p>';
-    }
 }

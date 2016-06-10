@@ -2,7 +2,17 @@
 
 namespace LAdmin\Package\ListView;
 
-abstract class BaseListView implements ListViewInterface
+use LAdmin\Package\PrintableInterface;
+
+abstract class BaseListView implements ListViewInterface, PrintableInterface
 {
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __toString() : String
+    {
+        throw new \Exception('@todo Implement!');
+    }
 
 }

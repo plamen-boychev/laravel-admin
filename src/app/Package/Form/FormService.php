@@ -2,10 +2,8 @@
 
 namespace LAdmin\Package\Form;
 
-class FormService
+use LAdmin\Package\ComponentFactoryComponent;
+
+class FormService extends ComponentFactoryComponent
 {
-    public function speak()
-    {
-        echo '<p>FormService : Yes, sir.</p>';
-    }
 }

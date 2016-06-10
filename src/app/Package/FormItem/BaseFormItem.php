@@ -2,7 +2,17 @@
 
 namespace LAdmin\Package\FormItem;
 
-abstract class BaseFormItem implements FormItemInterface
+use LAdmin\Package\PrintableInterface;
+
+abstract class BaseFormItem implements FormItemInterface, PrintableInterface
 {
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __toString() : String
+    {
+        throw new \Exception('@todo Implement!');
+    }
 
 }
