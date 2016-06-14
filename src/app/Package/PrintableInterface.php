@@ -10,8 +10,6 @@ interface PrintableInterface
      *
      * @param  null
      *
-     * @todo   Describe the method
-     *
      * @return String
      */
     public function __toString() : String;

@@ -71,4 +71,19 @@ class Row extends DomTag
         return $this;
     }
 
+    /**
+     * Adds a row with for the specified index, overrides an existing one
+     *
+     * @param  mixed $index
+     * @param  Cell $cell
+     *
+     * @return TableSectionInterface
+     */
+    public function addIndexedCell($index, Cell $cell) : Row
+    {
+        $this->cells[$index] = $cell;
+
+        return $this;
+    }
+
 }

@@ -4,7 +4,7 @@ namespace LAdmin\Package\Table\Cell;
 
 use LAdmin\Package\DomTag;
 
-class Cell extends DomTag
+class Cell extends DomTag implements CellInterface
 {
 
     protected $tagName = 'td';
@@ -15,17 +15,19 @@ class Cell extends DomTag
      */
     public function getContentMarkup() : String
     {
-        return $this->getContent();
+        return (String) $this->getContent();
     }
 
     /**
      * Setting content for the table cell
+     * The content needs to be a scalar value, an object implementing the
+     * __toString() method, or implementing the LAdmin\Package\PrintableInterface interface
      *
-     * @param  String $content
+     * @param  mixed $content
      *
      * @return Cell
      */
-    public function setContent(String $content) : Cell
+    public function setContent($content) : Cell
     {
         $this->content = $content;
 
@@ -33,13 +35,13 @@ class Cell extends DomTag
     }
 
     /**
-     * Setting content for the table cell
+     * Content getter for the table cell
      *
-     * @param  String $content
+     * @param  нулл
      *
      * @return String
      */
-    public function getContent() : String
+    public function getContent()
     {
         return $this->content;
     }

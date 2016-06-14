@@ -190,11 +190,11 @@ abstract class BaseTable extends DomTag implements TableInterface
      * @param  Array $data
      *
      * @return TableInterface
-     *
-     * @todo  Implement!
      */
     public function head(Array $data) : TableInterface
     {
+        $this->buildSectionContentFromArray($this->head ,$data);
+
         return $this;
     }
 
@@ -204,11 +204,11 @@ abstract class BaseTable extends DomTag implements TableInterface
      * @param  Array $data
      *
      * @return TableInterface
-     *
-     * @todo  Implement!
      */
     public function body(Array $data) : TableInterface
     {
+        $this->buildSectionContentFromArray($this->body ,$data);
+
         return $this;
     }
 
@@ -218,11 +218,26 @@ abstract class BaseTable extends DomTag implements TableInterface
      * @param  Array $data
      *
      * @return TableInterface
-     *
-     * @todo  Implement!
      */
     public function foot(Array $data) : TableInterface
     {
+        $this->buildSectionContentFromArray($this->foot ,$data);
+
+        return $this;
+    }
+
+    /**
+     * Sets content for the section object, content is built using the passed array parameter
+     *
+     * @param  TableSectionInterface $section
+     * @param  Array $data
+     *
+     * @return
+     */
+    public function buildSectionContentFromArray(TableSectionInterface $section, Array $data) : TableInterface
+    {
+        $section->buildContentFromArray($data);
+
         return $this;
     }
 
