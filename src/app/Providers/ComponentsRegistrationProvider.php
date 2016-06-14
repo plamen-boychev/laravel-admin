@@ -101,7 +101,8 @@ class ComponentsRegistrationProvider extends BaseProvider
      */
     private function registerTables()
     {
-        LATable::register('simple', PackageTables\SimpleTable::class);
+        LATable::register('simple',             PackageTables\SimpleTable::class);
+        LATable::register('model-collection',   PackageTables\ModelCollectionTable::class);
     }
 
 }

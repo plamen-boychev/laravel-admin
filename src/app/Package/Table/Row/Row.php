@@ -86,4 +86,23 @@ class Row extends DomTag
         return $this;
     }
 
+    /**
+     * Setting the content of the row by passing an array of the cell indexes / contents
+     *
+     * @param  Array $data
+     *
+     * @return Row
+     */
+    public function setContentFromArray(Array $data) : Row
+    {
+        foreach ($data as $index => $value)
+        {
+            $cell = new Cell;
+            $cell->setContent($value);
+            $this->addIndexedCell($index, $cell);
+        }
+
+        return $this;
+    }
+
 }

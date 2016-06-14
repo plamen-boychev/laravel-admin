@@ -252,4 +252,95 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
         return '<{tagname}{attributes}/>';
     }
 
+    /**
+     * Setting an attribute's value for the Dom Tag element
+     *
+     * @param  String $name
+     * @param  mixed $value - scalar value or an array
+     *
+     * @return DomTagInterface
+     */
+    public function addAttribute(String $name, $value) : DomTagInterface
+    {
+        $this->attributes[$name] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Adding a class to the Dom Tag element
+     *
+     * @param  String $class
+     *
+     * @return DomTagInterface
+     */
+    public function addClass($class) : DomTagInterface
+    {
+        if (!isset($this->attributes['class']))
+        {
+            $this->attributes['class'] = [];
+        }
+
+        array_push($this->attributes['class'], $class);
+
+        return $this;
+    }
+
+    /**
+     * Adding multiple classes to the Dom Tag element
+     *
+     * @param  Array $classes
+     *
+     * @return DomTagInterface
+     */
+    public function addClasses(Array $classes) : DomTagInterface
+    {
+        foreach ($classes as $key => $value)
+        {
+            $this->addClass($value);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Removes a class from the set ones if such exists
+     *
+     * @param  String $class
+     *
+     * @return
+     */
+    public function removeClass(String $class) : DomTagInterface
+    {
+        if (isset($this->attributes['class']) === false)
+        {
+            return $this;
+        }
+
+        $classPosition = array_search($class, $this->attributes['class']);
+
+        if ($classPosition === false)
+        {
+            return $this;
+        }
+
+        unset($this->attributes['class'][$classPosition]);
+
+        return $this;
+    }
+
+    /**
+     * Setting id attribute for the Dom Tag element
+     *
+     * @param  String $id
+     *
+     * @return DomTagInterface
+     */
+    public function setId(String $id) : DomTagInterface
+    {
+        $this->attributes['id'] = $id;
+
+        return $this;
+    }
+
 }
