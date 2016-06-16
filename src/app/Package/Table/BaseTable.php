@@ -21,6 +21,20 @@ abstract class BaseTable extends DomTag implements TableInterface
     protected $isContainerTag = true;
 
     /**
+     * @var bool
+     *
+     * Whether to print the head or not
+     */
+    protected $showHead = true;
+
+    /**
+     * @var bool
+     *
+     * Whether to print the foot or not
+     */
+    protected $showFoot = true;
+
+    /**
      * Constructor
      *
      * @param  null
@@ -237,6 +251,34 @@ abstract class BaseTable extends DomTag implements TableInterface
     public function buildSectionContentFromArray(TableSectionInterface $section, Array $data) : TableInterface
     {
         $section->buildContentFromArray($data);
+
+        return $this;
+    }
+
+    /**
+     * Whether to print or not the head
+     *
+     * @param  bool $flag = true
+     *
+     * @return TableInterface
+     */
+    public function showHead(bool $flag = true) : TableInterface
+    {
+        $this->showHead = $flag;
+
+        return $this;
+    }
+
+    /**
+     * Whether to print or not the foot
+     *
+     * @param  bool $flag = true
+     *
+     * @return TableInterface
+     */
+    public function showFoot(bool $flag = true) : TableInterface
+    {
+        $this->showFoot = $flag;
 
         return $this;
     }

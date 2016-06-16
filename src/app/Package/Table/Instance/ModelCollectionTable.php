@@ -43,20 +43,6 @@ class ModelCollectionTable extends BaseTable
     protected $headerLabels = [];
 
     /**
-     * @var bool
-     *
-     * Whether to print the head or not
-     */
-    protected $showHead = true;
-
-    /**
-     * @var bool
-     *
-     * Whether to print the foot or not
-     */
-    protected $showFoot = true;
-
-    /**
      * {@inheritdoc}
      */
     public function strigifyTableContents() : String
@@ -125,7 +111,7 @@ class ModelCollectionTable extends BaseTable
      */
     protected function buildFoot() : TableInterface
     {
-        if ($this->showHead !== true)
+        if ($this->showFoot !== true)
         {
             return $this;
         }
