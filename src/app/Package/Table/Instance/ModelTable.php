@@ -6,6 +6,7 @@ use Closure;
 use Exception;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use LAdmin\Package\Table\TableInterface;
+use LAdmin\Package\Model\PresentableModelInterface;
 
 /**
  * Table for working with collections of objects
@@ -64,19 +65,27 @@ class ModelTable extends ModelCollectionTable
 
         $this->query = $query;
 
+        if ($query instanceof PresentableModelInterface)
+        {
+            $this->buildPresentableModelDependencies();
+        }
+
         return $this;
     }
 
     /**
      * Modifying the query for the model
      *
-     * @param  Closure $callback
+     * @param  Closure|Array $modify
      *
      * @return TableInterface
+     *
+     * @todo   Fix query modification procedure
      */
-    public function modifyQuery(Closure $modify) : TableInterface
+    public function modifyQuery($modify) : TableInterface
     {
-        $modify($this->query);
+        echo '<p>Modify query</p>';
+        call_user_func($modify, $this->query);
 
         return $this;
     }
@@ -86,10 +95,29 @@ class ModelTable extends ModelCollectionTable
      */
     public function buildContents() : TableInterface
     {
+        echo '<p>Get results</p>';
         $collection = $this->query->get();
         $this->setCollection($collection);
 
         return parent::buildContents();
+    }
+
+    /**
+     * Builds all norally passed details using the PresentableModel configuration details
+     *
+     * @param  null
+     *
+     * @return TableInterface
+     */
+    public function buildPresentableModelDependencies() : TableInterface
+    {
+        $this->modifyQuery([$this->query, 'getQueryModifier']);
+        $this->setColumns($this->query->getColumns());
+        $this->setHeaders($this->query->getHeaders());
+        $this->showHead($this->query->showHead());
+        $this->showFoot($this->query->showFoot());
+
+        return $this;
     }
 
 }
