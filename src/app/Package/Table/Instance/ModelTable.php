@@ -15,6 +15,7 @@ class ModelTable extends ModelCollectionTable
 {
 
     protected $model;
+    protected $modelInstance;
     protected $query;
 
     /**
@@ -61,9 +62,10 @@ class ModelTable extends ModelCollectionTable
             throw new Exception("Model {$model} does not exist!");
         }
 
-        $query = new $modelClass;
+        $modelInstance = $query = new $modelClass;
 
         $this->query = $query;
+        $this->modelInstance = $modelInstance;
 
         if ($query instanceof PresentableModelInterface)
         {
@@ -84,8 +86,7 @@ class ModelTable extends ModelCollectionTable
      */
     public function modifyQuery($modify) : TableInterface
     {
-        echo '<p>Modify query</p>';
-        call_user_func($modify, $this->query);
+        call_user_func_array($modify, [&$this->query]);
 
         return $this;
     }
@@ -111,11 +112,11 @@ class ModelTable extends ModelCollectionTable
      */
     public function buildPresentableModelDependencies() : TableInterface
     {
-        $this->modifyQuery([$this->query, 'getQueryModifier']);
-        $this->setColumns($this->query->getColumns());
-        $this->setHeaders($this->query->getHeaders());
-        $this->showHead($this->query->showHead());
-        $this->showFoot($this->query->showFoot());
+        $this->modifyQuery([$this->modelInstance, 'tableQueryModifier']);
+        $this->setColumns($this->modelInstance->getColumns());
+        $this->setHeaders($this->modelInstance->getHeaders());
+        $this->showHead($this->modelInstance->showHead());
+        $this->showFoot($this->modelInstance->showFoot());
 
         return $this;
     }

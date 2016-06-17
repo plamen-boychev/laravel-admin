@@ -134,7 +134,7 @@ trait PresentableModel
     /**
      * {@inheritdoc}
      */
-    public function getQueryModifier($query)
+    public function tableQueryModifier(&$query)
     {
         return;
     }

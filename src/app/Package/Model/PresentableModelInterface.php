@@ -44,10 +44,10 @@ interface PresentableModelInterface
     /**
      * A procedure for modifying the loaded query for the table
      *
-     * @param  $query
+     * @param  &$query
      *
      * @return void
      */
-    public function getQueryModifier($query);
+    public function tableQueryModifier(&$query);
 
 }
