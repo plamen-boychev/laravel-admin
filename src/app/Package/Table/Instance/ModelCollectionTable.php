@@ -149,34 +149,11 @@ class ModelCollectionTable extends BaseTable
 
             foreach ($this->modelPropertiesAsColumns as $property)
             {
-                $propertyValue = null;
-                $getterNames = [
-                    'is' . ucfirst($property),
-                    'has' . ucfirst($property),
-                    'get' . ucfirst($property),
-                ];
+                $propertyValue = $this->getRowColumnValue($entry, $property)
+                    ?? $this->getEmptyColumnPlaceholder()
+                ;
 
-                foreach ($getterNames as $getter)
-                {
-                    if (method_exists($entry, $getter))
-                    {
-                        $propertyValue = $entry->{$getter}();
-                        break;
-                    }
-                }
-
-                $modelAttrbutes = $entry->getAttributes();
-                if (is_null($propertyValue) === true && isset($modelAttrbutes[$property]))
-                {
-                    $propertyValue = $entry->{$property};
-                }
-
-                if (is_null($propertyValue) === true)
-                {
-                    throw new Exception("Could not access property [{$property}]!");
-                }
-
-                $rowData[$property] = $propertyValue;
+                $rowData[$property] = $this->getRowColumnValue($entry, $property);
             }
 
             $row->setContentFromArray($rowData);
@@ -187,6 +164,166 @@ class ModelCollectionTable extends BaseTable
         return $this;
     }
 
+    /**
+     * Returns a printable value for an empty column value
+     * This method could be overriden to throw an exception if all column values
+     * are required for some reason
+     *
+     * @param  mixed $placeholder = null
+     *
+     * @return mixed - scalar value or printable object
+     */
+    protected function getEmptyColumnPlaceholder($placeholder = null)
+    {
+        return $placeholder
+            ?? $this->emptyPropertyPlaceholder
+        ;
+    }
+
+    /**
+     * Loading a column's value from a model's entry
+     *
+     * @param  mixed  $entry
+     * @param  String $property
+     *
+     * @return mixed - scalar value or printable object
+     */
+    public function getRowColumnValue($entry, String $property)
+    {
+        return $this->loadColumnValueFromEntryUsingPropertyGetter($entry, $property)
+            ?? $this->loadColumnValueFromEntryAccessingPropertyDirectly($entry, $property)
+            ?? $this->loadColumnValueFromEntryRelation($entry, $property)
+        ;
+    }
+
+    /**
+     * Loading a column's value from a model's entry using property getter
+     *
+     * @param  mixed  $entry
+     * @param  String $property
+     *
+     * @return mixed - scalar value or printable object
+     */
+    protected function loadColumnValueFromEntryUsingPropertyGetter($entry, String $property)
+    {
+        $propertyValue = null;
+
+        $getterNames = [
+            'is' . ucfirst($property),
+            'has' . ucfirst($property),
+            'get' . ucfirst($property),
+        ];
+
+        foreach ($getterNames as $getter)
+        {
+            if (method_exists($entry, $getter))
+            {
+                $propertyValue = $entry->{$getter}();
+                break;
+            }
+        }
+
+        return $propertyValue;
+    }
+
+    /**
+     * Loading a column's value from a model's entry accessing property directly
+     *
+     * @param  mixed  $entry
+     * @param  String $property
+     *
+     * @return mixed - scalar value or printable object
+     */
+    protected function loadColumnValueFromEntryAccessingPropertyDirectly($entry, String $property)
+    {
+        $propertyValue = null;
+
+        $modelAttrbutes = $entry->getAttributes();
+        if (is_null($propertyValue) === true && isset($modelAttrbutes[$property]))
+        {
+            $propertyValue = $entry->{$property};
+        }
+
+        return $propertyValue;
+    }
+
+    /**
+     * Loading a column's value from a model's entry loading a model's relation
+     *
+     * @param  mixed  $entry
+     * @param  String $relationName
+     *
+     * @return mixed - scalar value or printable object
+     */
+    protected function loadColumnValueFromEntryRelation($entry, String $relationName)
+    {
+        $relation = $entry->{$relationName}();
+        $relatedEntries = $relation->get();
+        $printableValue = [];
+
+        foreach ($relatedEntries as $index => $relatedEntry)
+        {
+            $relatedEntryPrint = $this->getRelationPrintableValue($relatedEntry, $entry);
+            array_push($printableValue, $relatedEntryPrint);
+        }
+
+        $printableValue = implode('', $printableValue);
+
+        return $printableValue;
+    }
+
+    /**
+     * Returns a printable value for the passed relation
+     *
+     * @param  mixed $relatedEntry
+     * @param  mixed $entry
+     *
+     * @return String
+     */
+    protected function getRelationPrintableValue($relatedEntry, $entry) : String
+    {
+        // $relationString = $this->normalizeString(get_class($relatedEntry));
+        $entryString = $this->normalizeString(get_class($entry));
+
+        $getter = "getColumnValueFor{$entryString}";
+
+        if (method_exists($relatedEntry, $getter)) {
+            return $relatedEntry->{$getter}();
+        } else {
+            return $this->fallbackRelationPritableValue($relatedEntry, $entry);
+        }
+    }
+
+    /**
+     * Returns default built of printable value for the relation of the entry
+     *
+     * @param  mixed $relatedEntry
+     * @param  mixed $entry
+     *
+     * @return String
+     */
+    protected function fallbackRelationPritableValue($relatedEntry, $entry) : String
+    {
+        $value = [];
+
+        foreach ($relatedEntry as $related)
+        {
+            array_push($value, (String) $related);
+        }
+
+        $value = implode('', $related);
+
+        return $value;
+    }
+
+    protected function normalizeString(String $string)
+    {
+        $string = class_basename($string);
+        $string = preg_replace("/[^A-Za-z0-9 ]/", '', $string);
+        $string = studly_case($string);
+
+        return $string;
+    }
 
     /**
      * Injecting the collection to work with

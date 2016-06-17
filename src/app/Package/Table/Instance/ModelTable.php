@@ -17,18 +17,21 @@ class ModelTable extends ModelCollectionTable
     protected $model;
     protected $modelInstance;
     protected $query;
+    protected $modelOptions = [];
 
     /**
      * Specifying the model to query
      * Model should not have a backslash in the beginning
      *
-     * @param  null
+     * @param  String $model
+     * @param  Array $options = null
      *
      * @return TableInterface
      */
-    public function model(String $model) : TableInterface
+    public function model(String $model, Array $options = null) : TableInterface
     {
         $this->model = $model;
+        $this->modelOptions = $options;
         $this->buildQueryForModel();
 
         return $this;
@@ -67,10 +70,32 @@ class ModelTable extends ModelCollectionTable
         $this->query = $query;
         $this->modelInstance = $modelInstance;
 
+        if (isset($this->modelOptions['scope']) === true)
+        {
+            $this->applyModelScope();
+        }
+
         if ($query instanceof PresentableModelInterface)
         {
             $this->buildPresentableModelDependencies();
         }
+
+        return $this;
+    }
+
+    /**
+     * Applying a model scope, specified in the options passed to self::model() as second argument
+     *
+     * @param  null
+     *
+     * @return TableInterface
+     */
+    protected function applyModelScope() : TableInterface
+    {
+        $scope = $this->modelOptions['scope'];
+
+        $this->query->{$scope}();
+        $this->modelInstance->{$scope}();
 
         return $this;
     }
@@ -96,11 +121,24 @@ class ModelTable extends ModelCollectionTable
      */
     public function buildContents() : TableInterface
     {
-        echo '<p>Get results</p>';
+        $this->buildCollection();
+
+        return parent::buildContents();
+    }
+
+    /**
+     * Builds the collection for the table
+     *
+     * @param  null
+     *
+     * @return TableInterface
+     */
+    protected function buildCollection() : TableInterface
+    {
         $collection = $this->query->get();
         $this->setCollection($collection);
 
-        return parent::buildContents();
+        return $this;
     }
 
     /**
@@ -119,6 +157,25 @@ class ModelTable extends ModelCollectionTable
         $this->showFoot($this->modelInstance->showFoot());
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getRelationPrintableValue($relatedEntry, $entry) : String
+    {
+        // $relationString = $this->normalizeString(get_class($relatedEntry));
+        $entryString = $this->normalizeString(get_class($entry));
+        $scopeString = $this->normalizeString($this->modelOptions['scope']);
+        $scopeString = $scopeString ?? '';
+
+        $getter = "getColumnValueFor{$entryString}{$scopeString}";
+
+        if (method_exists($relatedEntry, $getter)) {
+            return $relatedEntry->{$getter}();
+        } else {
+            return $this->fallbackRelationPritableValue($relatedEntry, $entry);
+        }
     }
 
 }
