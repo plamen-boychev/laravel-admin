@@ -7,12 +7,15 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use LAdmin\Package\Table\BaseTable;
 use LAdmin\Package\Table\TableInterface;
 use LAdmin\Package\Table\Row\Row;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * Table for working with collections of objects
  */
 class ModelCollectionTable extends BaseTable
 {
+
+    const CHAIN_DELIMITER = '.';
 
     /**
      * @var EloquentCollection
@@ -190,26 +193,97 @@ class ModelCollectionTable extends BaseTable
      */
     public function getRowColumnValue($entry, String $property)
     {
-        return $this->loadColumnValueFromEntryUsingPropertyGetter($entry, $property)
-            ?? $this->loadColumnValueFromEntryAccessingPropertyDirectly($entry, $property)
-            ?? $this->loadColumnValueFromEntryRelation($entry, $property)
+        $hasDot = strpos($property, self::CHAIN_DELIMITER);
+        if ($hasDot)
+        {
+            return $this->loadColumnValueFromChain($entry, $property);
+        }
+
+        return $this->loadEntityPropertyViaGetter($entry, $property)
+            ?? $this->loadEntityPropertyDirectly($entry, $property)
+            ?? $this->getEntityRelationPrintable($entry, $property)
         ;
     }
 
     /**
-     * Loading a column's value from a model's entry using property getter
+     * Loading a column's value from a model's chain of relations
+     * Returns one of the following:
+     *    - Method in following the convention {relationClass}::getColumnValueFor{ModelClassName}()
+     *    - relation's property value
+     *    - value, provided by a property's getter method
+     *    - Implementated of {relationClass}::__toString()
+     *
+     * @param  mixed  $chainString
+     * @param  String $relationName
+     *
+     * @return mixed - scalar value or printable object
+     */
+    protected function loadColumnValueFromChain($entry, String $chainString) : string
+    {
+        $morphingChain = $chain = explode(self::CHAIN_DELIMITER, $chainString);
+        $chainLink = null;
+        $chainResult = $entry;
+
+        while ($chainLink = array_shift($morphingChain))
+        {
+            $chainResult = $this->moveToChainLink($chainLink, $chainResult);
+        }
+
+        var_dump($chainResult);
+
+        // $relation = $entry->{$relationName}();
+        // $relatedEntries = $relation->get();
+        // $printableValue = [];
+        die;
+
+        // foreach ($relatedEntries as $index => $relatedEntry)
+        // {
+        //     $relatedEntryPrint = $this->getRelationPrintableValue($relatedEntry, $entry);
+        //     array_push($printableValue, $relatedEntryPrint);
+        // }
+
+        // $printableValue = implode('', $printableValue);
+
+        // return $printableValue;
+    }
+
+    /**
+     * Loading a column's value from a model's chain of relations
+     *
+     * @param  mixed $chainLink
+     * @param  mixed $chainResult
+     *
+     * @return mixed - relation, property or result of a method of the passed entry
+     */
+    protected function moveToChainLink($chainLink, $chainResult)
+    {
+        $step = $this->loadEntityPropertyViaGetter($chainResult, $chainLink)
+            ??  $this->loadEntityPropertyDirectly($chainResult, $chainLink)
+            ??  $this->getEntityRelation($chainResult, $chainLink)
+        ;
+
+        if ($step instanceof EloquentCollection && ((bool) $step->count()) === false)
+        {
+            $step = $step->shift();
+        }
+
+        return $step;
+    }
+
+    /**
+     * Loading an entity's property's value using a property getter
      *
      * @param  mixed  $entry
      * @param  String $property
      *
      * @return mixed - scalar value or printable object
      */
-    protected function loadColumnValueFromEntryUsingPropertyGetter($entry, String $property)
+    protected function loadEntityPropertyViaGetter($entry, String $property)
     {
         $propertyValue = null;
 
         $getterNames = [
-            'is' . ucfirst($property),
+            'is'  . ucfirst($property),
             'has' . ucfirst($property),
             'get' . ucfirst($property),
         ];
@@ -227,15 +301,24 @@ class ModelCollectionTable extends BaseTable
     }
 
     /**
-     * Loading a column's value from a model's entry accessing property directly
+     * Loading an entity's property accessing it directly
      *
      * @param  mixed  $entry
      * @param  String $property
      *
      * @return mixed - scalar value or printable object
      */
-    protected function loadColumnValueFromEntryAccessingPropertyDirectly($entry, String $property)
+    protected function loadEntityPropertyDirectly($entry, String $property)
     {
+        if (is_object($entry) === false)
+        {
+            return null;
+        }
+        if (method_exists($entry, 'getAttributes') === false)
+        {
+            return null;
+        }
+
         $propertyValue = null;
 
         $modelAttrbutes = $entry->getAttributes();
@@ -248,14 +331,50 @@ class ModelCollectionTable extends BaseTable
     }
 
     /**
-     * Loading a column's value from a model's entry loading a model's relation
+     * Loading the passed entity's relation
+     *
+     * @param  mixed  $entry
+     * @param  String $relationName
+     *
+     * @return relation
+     */
+    protected function getEntityRelation($entry, String $relationName)
+    {
+        if (method_exists($entry, $relationName))
+        {
+            return null;
+        }
+
+        $relation = $entry->{$relationName}();
+
+        if (is_null($relation) === true)
+        {
+            return null;
+        }
+
+        $isRelation = is_subclass_of($relation, '\\Illuminate\\Database\\Eloquent\\Relations\\Relation');
+
+        if ($isRelation === false)
+        {
+            return null;
+        }
+
+        $relatedEntries = $relation->get();
+
+        return $relatedEntries;
+    }
+
+    /**
+     * Loading an entity's relation as a printable value
+     * Relation string is being loaded from {relationClass}::__toString() or
+     * {relationClass}::getColumnValueFor{ModelClassName}()
      *
      * @param  mixed  $entry
      * @param  String $relationName
      *
      * @return mixed - scalar value or printable object
      */
-    protected function loadColumnValueFromEntryRelation($entry, String $relationName)
+    protected function getEntityRelationPrintable($entry, String $relationName)
     {
         $relation = $entry->{$relationName}();
         $relatedEntries = $relation->get();
@@ -274,13 +393,16 @@ class ModelCollectionTable extends BaseTable
 
     /**
      * Returns a printable value for the passed relation
+     * Relation string is being loaded from {relationClass}::__toString() or
+     * {relationClass}::getColumnValueFor{ModelClassName}()
+     * ModelClassName should be in studly case
      *
      * @param  mixed $relatedEntry
-     * @param  mixed $entry
+     * @param  mixed $entry = null
      *
      * @return String
      */
-    protected function getRelationPrintableValue($relatedEntry, $entry) : String
+    protected function getRelationPrintableValue($relatedEntry, $entry = null) : String
     {
         // $relationString = $this->normalizeString(get_class($relatedEntry));
         $entryString = $this->normalizeString(get_class($entry));
@@ -298,11 +420,11 @@ class ModelCollectionTable extends BaseTable
      * Returns default built of printable value for the relation of the entry
      *
      * @param  mixed $relatedEntry
-     * @param  mixed $entry
+     * @param  mixed $entry = null
      *
      * @return String
      */
-    protected function fallbackRelationPritableValue($relatedEntry, $entry) : String
+    protected function fallbackRelationPritableValue($relatedEntry, $entry = null) : String
     {
         $value = [];
 

@@ -160,9 +160,12 @@ class ModelTable extends ModelCollectionTable
     }
 
     /**
+     * Relation string is being loaded from {relationClass}::__toString() or
+     * {relationClass}::getColumnValueFor{ModelClassName}[scopeName]()
+     * ModelClassName & scopeName should be in studly case
      * {@inheritdoc}
      */
-    protected function getRelationPrintableValue($relatedEntry, $entry) : String
+    protected function getRelationPrintableValue($relatedEntry, $entry = null) : string
     {
         // $relationString = $this->normalizeString(get_class($relatedEntry));
         $entryString = $this->normalizeString(get_class($entry));
