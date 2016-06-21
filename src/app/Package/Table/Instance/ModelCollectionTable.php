@@ -4,10 +4,12 @@ namespace LAdmin\Package\Table\Instance;
 
 use Exception;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection as BaseCollection;
 use LAdmin\Package\Table\BaseTable;
 use LAdmin\Package\Table\TableInterface;
 use LAdmin\Package\Table\Row\Row;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use LAdmin\Package\PrintableInterface;
 
 /**
  * Table for working with collections of objects
@@ -187,11 +189,11 @@ class ModelCollectionTable extends BaseTable
      * Loading a column's value from a model's entry
      *
      * @param  mixed  $entry
-     * @param  String $property
+     * @param  string $property
      *
      * @return mixed - scalar value or printable object
      */
-    public function getRowColumnValue($entry, String $property)
+    public function getRowColumnValue($entry, string $property)
     {
         $hasDot = strpos($property, self::CHAIN_DELIMITER);
         if ($hasDot)
@@ -214,11 +216,11 @@ class ModelCollectionTable extends BaseTable
      *    - Implementated of {relationClass}::__toString()
      *
      * @param  mixed  $chainString
-     * @param  String $relationName
+     * @param  string $relationName
      *
      * @return mixed - scalar value or printable object
      */
-    protected function loadColumnValueFromChain($entry, String $chainString) : string
+    protected function loadColumnValueFromChain($entry, string $chainString) : string
     {
         $morphingChain = $chain = explode(self::CHAIN_DELIMITER, $chainString);
         $chainLink = null;
@@ -227,24 +229,46 @@ class ModelCollectionTable extends BaseTable
         while ($chainLink = array_shift($morphingChain))
         {
             $chainResult = $this->moveToChainLink($chainLink, $chainResult);
+
+            if (count($morphingChain) === 0)
+            {
+                break;
+            }
         }
 
-        var_dump($chainResult);
+        if ($chainResult instanceof EloquentCollection === false && $chainResult instanceof BaseCollection === false)
+        {
+            $class = get_class($entry);
+            throw new Exception("Cannot process chain [{$chainString}] for model {$class}!");
+        }
 
-        // $relation = $entry->{$relationName}();
-        // $relatedEntries = $relation->get();
-        // $printableValue = [];
-        die;
+        $printableValue = $this->strigifyCollectionResultFromChainGetter($entry, $chainLink, $chainResult);
 
-        // foreach ($relatedEntries as $index => $relatedEntry)
-        // {
-        //     $relatedEntryPrint = $this->getRelationPrintableValue($relatedEntry, $entry);
-        //     array_push($printableValue, $relatedEntryPrint);
-        // }
+        return $printableValue;
+    }
 
-        // $printableValue = implode('', $printableValue);
+    /**
+     * Stringying collection, resulted from chained getter
+     *
+     * @param  mixed  $entry
+     * @param  string $propertyName
+     * @param  EloquentCollection|BaseCollection $collection
+     *
+     * @return string
+     */
+    public function strigifyCollectionResultFromChainGetter($entry, string $propertyName, $collection) : String
+    {
+        $strigifyMethod = 'property' . ucfirst($propertyName) . 'ListToString';
 
-        // return $printableValue;
+        if (method_exists($entry, $strigifyMethod) === false)
+        {
+            $class = get_class($entry);
+            throw new Exception("Method {$class}::{$strigifyMethod}() does not exist!");
+        }
+
+        $printableValue = $entry->{$strigifyMethod}($collection);
+
+        return $printableValue;
     }
 
     /**
@@ -260,6 +284,7 @@ class ModelCollectionTable extends BaseTable
         $step = $this->loadEntityPropertyViaGetter($chainResult, $chainLink)
             ??  $this->loadEntityPropertyDirectly($chainResult, $chainLink)
             ??  $this->getEntityRelation($chainResult, $chainLink)
+            ??  $this->listCollectionProperty($chainResult, $chainLink)
         ;
 
         if ($step instanceof EloquentCollection && ((bool) $step->count()) === false)
@@ -274,11 +299,11 @@ class ModelCollectionTable extends BaseTable
      * Loading an entity's property's value using a property getter
      *
      * @param  mixed  $entry
-     * @param  String $property
+     * @param  string $property
      *
      * @return mixed - scalar value or printable object
      */
-    protected function loadEntityPropertyViaGetter($entry, String $property)
+    protected function loadEntityPropertyViaGetter($entry, string $property)
     {
         $propertyValue = null;
 
@@ -304,16 +329,17 @@ class ModelCollectionTable extends BaseTable
      * Loading an entity's property accessing it directly
      *
      * @param  mixed  $entry
-     * @param  String $property
+     * @param  string $property
      *
      * @return mixed - scalar value or printable object
      */
-    protected function loadEntityPropertyDirectly($entry, String $property)
+    protected function loadEntityPropertyDirectly($entry, string $property)
     {
         if (is_object($entry) === false)
         {
             return null;
         }
+
         if (method_exists($entry, 'getAttributes') === false)
         {
             return null;
@@ -334,13 +360,13 @@ class ModelCollectionTable extends BaseTable
      * Loading the passed entity's relation
      *
      * @param  mixed  $entry
-     * @param  String $relationName
+     * @param  string $relationName
      *
      * @return relation
      */
-    protected function getEntityRelation($entry, String $relationName)
+    protected function getEntityRelation($entry, string $relationName)
     {
-        if (method_exists($entry, $relationName))
+        if (method_exists($entry, $relationName) === false)
         {
             return null;
         }
@@ -359,9 +385,27 @@ class ModelCollectionTable extends BaseTable
             return null;
         }
 
-        $relatedEntries = $relation->get();
+        $relatedEntries = $relation->getResults();
 
         return $relatedEntries;
+    }
+
+    /**
+     * Lists a property from a passed collection
+     *
+     * @param  mixed  $entry
+     * @param  string $relationName
+     *
+     * @return relation
+     */
+    protected function listCollectionProperty($collection, string $relationName)
+    {
+        if ($collection instanceof EloquentCollection)
+        {
+            return $collection->lists($relationName);
+        }
+
+        return null;
     }
 
     /**
@@ -370,11 +414,11 @@ class ModelCollectionTable extends BaseTable
      * {relationClass}::getColumnValueFor{ModelClassName}()
      *
      * @param  mixed  $entry
-     * @param  String $relationName
+     * @param  string $relationName
      *
      * @return mixed - scalar value or printable object
      */
-    protected function getEntityRelationPrintable($entry, String $relationName)
+    protected function getEntityRelationPrintable($entry, string $relationName)
     {
         $relation = $entry->{$relationName}();
         $relatedEntries = $relation->get();
@@ -414,6 +458,8 @@ class ModelCollectionTable extends BaseTable
         } else {
             return $this->fallbackRelationPritableValue($relatedEntry, $entry);
         }
+
+        throw new Exception("Cannot get printable value for {$relatedEntry}!");
     }
 
     /**

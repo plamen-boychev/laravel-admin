@@ -181,4 +181,32 @@ class ModelTable extends ModelCollectionTable
         }
     }
 
+    /**
+     * Stringying collection, resulted from chained getter
+     *
+     * @param  mixed  $entry
+     * @param  string $propertyName
+     * @param  EloquentCollection|BaseCollection $collection
+     *
+     * @return string
+     */
+    public function strigifyCollectionResultFromChainGetter($entry, string $propertyName, $collection) : String
+    {
+        // $relationString = $this->normalizeString(get_class($relatedEntry));
+        $entryString = $this->normalizeString(get_class($entry));
+        $scopeString = $this->normalizeString($this->modelOptions['scope']);
+        $scopeString = $scopeString ?? '';
+
+        $getter = 'property' . "{$entryString}{$scopeString}" . 'ListToString';
+
+        if (method_exists($entry, $getter) === false)
+        {
+            return parent::strigifyCollectionResultFromChainGetter($entry, $propertyName, $collection);
+        }
+
+        $printableValue = $entry->{$getter}($collection);
+
+        return $printableValue;
+    }
+
 }
