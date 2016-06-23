@@ -45,6 +45,46 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      */
     protected $isContainerTag = true;
 
+    /**
+     * @var string|null
+     *
+     * If the directory is set it is used to load templates from files for it's
+     * printable value; the structure should be as follows:
+     *
+     * Template directory path:
+     * ./
+     *  form.blade.php
+     *  fieldset.blade.php
+     *  label.blade.php
+     *  ./elements
+     *      textfield.blade.php
+     *      textarea.blade.php
+     *      select.blade.php
+     *      [form-item-component-alias].blade.php
+     *  ./fields
+     *      [form-item-alias].blade.php
+     *  ./custom
+     *      [form-item-alias].blade.php
+     *
+     * - [form-item-component-alias] - registation alias, used at component registrar
+     * - [form-item-alias] - alias of the form item, when added to the form
+     */
+    protected $templateDirectory;
+
+    /**
+     * @var string|null
+     *
+     * Filename for the tag's template
+     */
+    protected $templateFileName;
+
+    /**
+     * @var array
+     *
+     * Data to pass to the template
+     */
+    protected $templateData = [];
+
     public function __construct()
     {
         $this->buildDomTemplate();
@@ -57,9 +97,240 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @return String
      */
-    public function __toString() : String
+    public function __toString() : string
     {
-        return $this->getPrintable();
+        $templateDirectory = $this->getTemplateDirectory();
+        $templateFileName  = $this->getTemplateFileName();
+
+        if (empty($templateDirectory) === true && empty($templateFileName) === true) {
+            return $this->getPrintable();
+        } else {
+            $data = $this->getTempalteData();
+            $data[$this->tagName] = $this;
+
+            return view($this->getViewFilePath(), $data)->render();
+        }
+    }
+
+    /**
+     * Setter for template direcotry property - this is where the templates for the form will be loaded from
+     *
+     * @param  string $directory
+     *
+     * @return PrintableInterface
+     */
+    public function setTemplateDirectory(string $directory) : PrintableInterface
+    {
+        $this->requireExistingResourcePath($directory);
+        $this->templateDirectory = $directory;
+
+        return $this;
+    }
+
+    /**
+     * Returns the template direcotry for the tag
+     *
+     * @param  null
+     *
+     * @return string|null
+     */
+    public function getTemplateDirectory()
+    {
+        return $this->templateDirectory ?? null;
+    }
+
+    /**
+     * Setting the data to be passed to the template
+     *
+     * @param  array $data
+     *
+     * @return PrintableInterface
+     */
+    public function setTemplateData(array $data) : PrintableInterface
+    {
+        $this->templateData = $data;
+
+        return $this;
+    }
+
+    /**
+     * Returns the data that would be passed to the view
+     *
+     * @param  null
+     *
+     * @return array
+     */
+    public function getTempalteData() : array
+    {
+        return $this->templateData;
+    }
+
+    /**
+     * Setting the data to be passed to the template
+     *
+     * @param  array $params - formats:
+     *         - [
+     *              (string) $key => (mixed) $value,
+     *              (string) $key => (mixed) $value,
+     *              (string) $key => (mixed) $value,
+     *              (string) $key => (mixed) $value,
+     *              ...
+     *           ] - will be merged to the current
+     *         - [
+     *              (string) $key,
+     *              (mixed) $value
+     *           ] - value will be added, indexed by $key
+     *
+     * @return PrintableInterface
+     */
+    public function addTemplateData(...$params) : PrintableInterface
+    {
+        if (empty($params))
+        {
+            throw new Exception('No data provided for addition to the view variables!');
+        }
+
+        $firstParam  = $params[0];
+
+        if (is_array($firstParam) === true && count($params) == 1)
+        {
+            $this->templateData = $this->templateData + $firstParam;
+
+            return $this;
+        }
+
+        $secondParam = $params[1];
+
+        if (count($params) == 2 || is_string($firstParam) === true)
+        {
+            $this->templateData[$firstParam] = $secondParam;
+
+            return $this;
+        }
+
+        throw new Exception('Unsupported parameters format!');
+    }
+
+    /**
+     * Checks if the passed array is associative or sequential
+     *
+     * @param  array $array
+     *
+     * @return bool
+     */
+    public function isAssociativeArray(array $array) : bool
+    {
+        return array_keys($array) !== range(0, count($array) - 1);
+    }
+
+    /**
+     * Setter for template file property - a template file for the tag
+     *
+     * @param  string $path
+     *
+     * @return PrintableInterface
+     */
+    public function setTemplateFileName(string $path) : PrintableInterface
+    {
+        $this->templateFileName = $path;
+
+        return $this;
+    }
+
+    /**
+     * Returns the template file name for the tag
+     *
+     * @param  null
+     *
+     * @return string|null
+     */
+    public function getTemplateFileName()
+    {
+        return $this->templateFileName ?? null;
+    }
+
+    /**
+     * Returns the full path to the template for the form, using the specified
+     * form skin / directory
+     *
+     * @param  null
+     *
+     * @return string
+     */
+    public function getViewFilePath() : string
+    {
+        return $this->getTemplateDirectory() . '.' . $this->getTemplateName();
+    }
+
+    /**
+     * Returns the name of the template for the tag
+     *
+     * @param  null
+     *
+     * @return string
+     */
+    public function getTemplateName() : string
+    {
+        return $this->getTemplateFileName() ?? $this->tagName;
+    }
+
+    /**
+     * Verifies the specified view directory exists
+     *
+     * @param  string $directory
+     *
+     * @return PrintableInterface
+     */
+    protected function requireExistingResourcePath(string $directory) : PrintableInterface
+    {
+        $fullPath = $this->existsInViews($directory);
+
+        if (empty($fullPath))
+        {
+            throw new Exception("Path [{$fullPath}] does not exist!");
+        }
+
+        return $this;
+    }
+
+    /**
+     * Requires the specified file path to be an existing one
+     *
+     * @param  string $path
+     *
+     * @return  === true
+     */
+    protected function requireExistingResourceFile(string $path) : PrintableInterface
+    {
+        $phpFilePath   = $path . '.php';
+        $bladeFilePath = $path . '.blade.php';
+
+        $existsPhpFilePath = $this->existsInViews($path);
+        $existsBladeFilePath = $this->existsInViews($path);
+
+        if (empty($existsPhpFilePath) === true && empty($existsBladeFilePath) === true)
+        {
+            throw new Exception("View [{$path}] does not exist!");
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns a flag - does the passed directory or file exist in the views directory
+     *
+     * @param  string $directory
+     *
+     * @return bool
+     */
+    protected function existsInViews(string $directory) : bool
+    {
+        $ds = DIRECTORY_SEPARATOR;
+        $path = base_path();
+        $fullPath = $path . $ds . 'resources' . $ds . 'views' . $ds . implode($ds, explode('.', $directory));
+        $fullPath = realpath($fullPath);
+
+        return (bool) $fullPath;
     }
 
     /**
@@ -69,13 +340,13 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @return String
      */
-    public function getPrintable() : String
+    public function getPrintable() : string
     {
         $template = $this->baseTagTemplate;
 
         if (empty($template))
         {
-            throw new Exception('No template was set! You need to either pass value for it or specify the tag\'s ');
+            throw new Exception('No template was set! You need to either pass value for it or specify the tag\'s name!');
         }
 
         $attributes = $this->replaceDomPropertiesPlaceholders($template);
@@ -85,8 +356,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
         ;
 
         $markup  = implode($attributes, explode('{attributes}', $template));
-
-        $content = $this->getContentMarkup();
+        $content = $this->isContainerTag === true ? $this->getContentMarkup() : null;
 
         if (empty($content) === true && $this->shouldPrintIfNoContentMarkup() === false )
         {
@@ -120,7 +390,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @return String
      */
-    public function getContentMarkup() : String
+    public function getContentMarkup() : string
     {
         throw new Exception('DomTagInterface::getContentMarkup() needs to be implemented in each extending class!');
     }
@@ -132,7 +402,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @return String
      */
-    protected function replaceDomPropertiesPlaceholders(String $template) : String
+    protected function replaceDomPropertiesPlaceholders(String $template) : string
     {
         $attrData = $this->attributes;
         $attributes = [];
@@ -159,7 +429,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @return String
      */
-    protected function scalarizeTagAttribute($value) : String
+    protected function scalarizeTagAttribute($value) : string
     {
         return $this->scalarizeNonScalar($value);
     }
@@ -172,7 +442,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @return String
      */
-    protected function scalarizeAttributeValues($value) : String
+    protected function scalarizeAttributeValues($value) : string
     {
         return $this->scalarizeNonScalar($value);
     }
@@ -187,7 +457,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @return String
      */
-    protected function scalarizeNonScalar($value) : String
+    protected function scalarizeNonScalar($value) : string
     {
         if (is_array($value) === true) {
             return implode(' ', $value);
@@ -235,7 +505,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @return String
      */
-    protected function getContainerTagTemplatePrototype() : String
+    protected function getContainerTagTemplatePrototype() : string
     {
         return '<{tagname}{attributes}>{content}</{tagname}>';
     }
@@ -247,7 +517,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @return String
      */
-    protected function getNonContainerTagTemplatePrototype() : String
+    protected function getNonContainerTagTemplatePrototype() : string
     {
         return '<{tagname}{attributes}/>';
     }
@@ -263,6 +533,41 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
     public function addAttribute(String $name, $value) : DomTagInterface
     {
         $this->attributes[$name] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Getting an attribute's value for the Dom Tag element
+     *
+     * @param  String $name
+     * @param  mixed $default - default value
+     *
+     * @return mixed
+     */
+    public function getAttribute(String $name, $default = null)
+    {
+        if (isset($this->attributes[$name]) === false)
+        {
+            return $default;
+        }
+
+        return $this->attributes[$name];
+    }
+
+    /**
+     * Removing an attribute's value for the Dom Tag element
+     *
+     * @param  String $name
+     *
+     * @return mixed
+     */
+    public function removeAttribute(String $name, $default = null) : DomTagInterface
+    {
+        if (isset($this->attributes[$name]))
+        {
+            unset($this->attributes[$name]);
+        }
 
         return $this;
     }

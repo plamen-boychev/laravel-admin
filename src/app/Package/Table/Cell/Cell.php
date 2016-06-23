@@ -13,7 +13,7 @@ class Cell extends DomTag implements CellInterface
     /**
      * {@inheritdox}
      */
-    public function getContentMarkup() : String
+    public function getContentMarkup() : string
     {
         return (String) $this->getContent();
     }

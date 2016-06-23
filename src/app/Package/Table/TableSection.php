@@ -16,7 +16,7 @@ abstract class TableSection extends DomTag implements TableSectionInterface
     /**
      * {@inheritdox}
      */
-    public function getContentMarkup() : String
+    public function getContentMarkup() : string
     {
         return $this->strigifyTableSectionContents();
     }
@@ -29,7 +29,7 @@ abstract class TableSection extends DomTag implements TableSectionInterface
      *
      * @return String
      */
-    public function strigifyTableSectionContents() : String
+    public function strigifyTableSectionContents() : string
     {
         $rows = $this->rows;
 

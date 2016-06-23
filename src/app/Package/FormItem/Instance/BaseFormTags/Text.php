@@ -1,0 +1,87 @@
+<?php
+
+namespace LAdmin\Package\FormItem\Instance\BaseFormTags;
+
+use LAdmin\Package\FormItem\Instance\SimpleFormItem;
+use LAdmin\Package\PrintableInterface;
+
+class Text extends SimpleFormItem
+{
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $tagName = 'input';
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $isContainerTag = false;
+
+    /**
+     * @var mixed
+     *
+     * Either a scalar value or an implementation of PrintableInterface
+     */
+    protected $value;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __toString() : string
+    {
+        # This is the last moment we're able to set it, as also it's being set
+        # every time the tag will be printed. It's done here, instead of the
+        # constructor, so it's not wasted on such an insignificant change
+        $this->addAttribute('type', 'text');
+
+        return parent::__toString();
+    }
+
+    /**
+     * Setting a value for the field, using an attribute
+     *
+     * @param  string|PrintableInterface $value
+     *
+     * @return FormItemInterface
+     *
+     * @throws Exception if the passed value is not printable - either a scalar
+     *         value of a PrintableInterface implementation
+     */
+    public function setValue($value) : FormItemInterface
+    {
+        if (is_string($value) === false && $value instanceof PrintableInterface)
+        {
+            throw new Exception("The passed value needs to be either a scalar value or an implementation of PrintableInterface!");
+        }
+
+        $this->addAttribute('value', $value);
+
+        return $this;
+    }
+
+    /**
+     * Getter for the @var $value property
+     *
+     * @param  null
+     *
+     * @return mixed
+     */
+    public function getValue()
+    {
+        return $this->getAttribute('value');
+    }
+
+    /**
+     * Returns a string representation of the object
+     *
+     * @param  null
+     *
+     * @return string
+     */
+    public function render() : string
+    {
+        return $this->__toString();
+    }
+
+}

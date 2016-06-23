@@ -10,7 +10,7 @@ abstract class BaseListColumn implements ListColumnInterface, PrintableInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString() : String
+    public function __toString() : string
     {
         throw new \Exception('@todo Implement!');
     }

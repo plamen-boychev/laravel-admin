@@ -15,7 +15,7 @@ class Row extends DomTag
     /**
      * {@inheritdox}
      */
-    public function getContentMarkup() : String
+    public function getContentMarkup() : string
     {
         return $this->strigifyRowContents();
     }
@@ -28,7 +28,7 @@ class Row extends DomTag
      *
      * @return String
      */
-    public function strigifyRowContents() : String
+    public function strigifyRowContents() : string
     {
         $cells = $this->cells;
 

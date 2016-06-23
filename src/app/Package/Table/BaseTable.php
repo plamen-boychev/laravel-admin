@@ -53,7 +53,7 @@ abstract class BaseTable extends DomTag implements TableInterface
     /**
      * {@inheritdox}
      */
-    public function getContentMarkup() : String
+    public function getContentMarkup() : string
     {
         return $this->strigifyTableContents();
     }
@@ -65,7 +65,7 @@ abstract class BaseTable extends DomTag implements TableInterface
      *
      * @return String
      */
-    public function strigifyTableContents() : String
+    public function strigifyTableContents() : string
     {
         return (String) $this->head
             .  (String) $this->body

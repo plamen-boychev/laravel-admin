@@ -66,6 +66,17 @@ class ComponentsRegistrationProvider extends BaseProvider
     private function registerFormItems()
     {
         LAFormItem::register('simple', PackageFormItems\SimpleFormItem::class);
+        LAFormItem::register('text', PackageFormItems\BaseFormTags\Text::class);
+        // LAFormItem::register('file', PackageFormItems\SimpleFormItem::class);
+        // LAFormItem::register('email', PackageFormItems\SimpleFormItem::class);
+        // LAFormItem::register('button', PackageFormItems\SimpleFormItem::class);
+        // LAFormItem::register('datalist', PackageFormItems\SimpleFormItem::class);
+        // LAFormItem::register('tange', PackageFormItems\SimpleFormItem::class);
+        // LAFormItem::register('number', PackageFormItems\SimpleFormItem::class);
+        // LAFormItem::register('textarea', PackageFormItems\SimpleFormItem::class);
+        // LAFormItem::register('select', PackageFormItems\SimpleFormItem::class);
+        // LAFormItem::register('checkbox', PackageFormItems\SimpleFormItem::class);
+        // LAFormItem::register('radio', PackageFormItems\SimpleFormItem::class);
     }
 
     /**

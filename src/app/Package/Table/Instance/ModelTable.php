@@ -190,7 +190,7 @@ class ModelTable extends ModelCollectionTable
      *
      * @return string
      */
-    public function strigifyCollectionResultFromChainGetter($entry, string $propertyName, $collection) : String
+    public function strigifyCollectionResultFromChainGetter($entry, string $propertyName, $collection) : string
     {
         // $relationString = $this->normalizeString(get_class($relatedEntry));
         $entryString = $this->normalizeString(get_class($entry));

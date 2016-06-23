@@ -50,7 +50,7 @@ class ModelCollectionTable extends BaseTable
     /**
      * {@inheritdoc}
      */
-    public function strigifyTableContents() : String
+    public function strigifyTableContents() : string
     {
         $this->buildContents();
 
@@ -256,7 +256,7 @@ class ModelCollectionTable extends BaseTable
      *
      * @return string
      */
-    public function strigifyCollectionResultFromChainGetter($entry, string $propertyName, $collection) : String
+    public function strigifyCollectionResultFromChainGetter($entry, string $propertyName, $collection) : string
     {
         $strigifyMethod = 'property' . ucfirst($propertyName) . 'ListToString';
 
@@ -446,7 +446,7 @@ class ModelCollectionTable extends BaseTable
      *
      * @return String
      */
-    protected function getRelationPrintableValue($relatedEntry, $entry = null) : String
+    protected function getRelationPrintableValue($relatedEntry, $entry = null) : string
     {
         // $relationString = $this->normalizeString(get_class($relatedEntry));
         $entryString = $this->normalizeString(get_class($entry));
@@ -470,7 +470,7 @@ class ModelCollectionTable extends BaseTable
      *
      * @return String
      */
-    protected function fallbackRelationPritableValue($relatedEntry, $entry = null) : String
+    protected function fallbackRelationPritableValue($relatedEntry, $entry = null) : string
     {
         $value = [];
 

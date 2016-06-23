@@ -44,22 +44,24 @@ abstract class ComponentFactoryComponent implements ComponentFactoryComponentInt
      * Instantiates a table matched by alias
      *
      * @param  String $alias
+     * @param  Array  $params - variadic parameters - will be passed to the constructor of the component
      *
      * @return TableInterface
      */
-    public function factory(String $alias)
+    public function factory(String $alias, ...$params)
     {
-        return $this->instatiateRegiteredType($alias);
+        return $this->instatiateRegiteredType($alias, $params);
     }
 
     /**
      * Creating an instance of the specified type, matched by alias
      *
      * @param  String $alias
+     * @param  array  $params - constructor parameters
      *
      * @return mixed
      */
-    protected function instatiateRegiteredType($alias)
+    protected function instatiateRegiteredType($alias, array $params)
     {
         $className = $this->registeredTypes[$alias] ?? null;
 
@@ -75,7 +77,11 @@ abstract class ComponentFactoryComponent implements ComponentFactoryComponentInt
 
         $className = '\\' . $className;
 
-        return new $className;
+        if (empty($params)) {
+            return new $className;
+        } else {
+            return new $className($params);
+        }
     }
 
 }

@@ -12,7 +12,7 @@ interface PresentableModelInterface
      *
      * @return Array
      */
-    public function getColumns() : Array;
+    public function getColumns() : array;
 
     /**
      * Provides a list of header names to be displayed
@@ -21,7 +21,7 @@ interface PresentableModelInterface
      *
      * @return Array
      */
-    public function getHeaders() : Array;
+    public function getHeaders() : array;
 
     /**
      * Provides a flag - show / hide table's head

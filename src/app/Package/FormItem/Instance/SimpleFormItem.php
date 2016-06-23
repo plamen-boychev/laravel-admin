@@ -6,5 +6,4 @@ use LAdmin\Package\FormItem\BaseFormItem;
 
 class SimpleFormItem extends BaseFormItem
 {
-
 }

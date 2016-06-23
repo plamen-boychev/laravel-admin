@@ -12,6 +12,6 @@ interface PrintableInterface
      *
      * @return String
      */
-    public function __toString() : String;
+    public function __toString() : string;
 
 }

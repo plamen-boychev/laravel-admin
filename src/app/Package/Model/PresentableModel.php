@@ -106,7 +106,7 @@ trait PresentableModel
     /*
      * {@inheritdoc}
      */
-    public function getColumns() : Array
+    public function getColumns() : array
     {
         if (empty($this->columns))
         {
@@ -120,7 +120,7 @@ trait PresentableModel
     /*
      * {@inheritdoc}
      */
-    public function getHeaders() : Array
+    public function getHeaders() : array
     {
         if (empty($this->headers))
         {
