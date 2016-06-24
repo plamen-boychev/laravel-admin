@@ -75,8 +75,8 @@ class ComponentsRegistrationProvider extends BaseProvider
         LAFormItem::register('submit-button', PackageFormItems\BaseFormTags\SubmitButton::class);
         // LAFormItem::register('datalist', PackageFormItems\SimpleFormItem::class);
         // LAFormItem::register('range', PackageFormItems\SimpleFormItem::class);
-        // LAFormItem::register('textarea', PackageFormItems\SimpleFormItem::class);
-        // LAFormItem::register('select', PackageFormItems\SimpleFormItem::class);
+        LAFormItem::register('textarea', PackageFormItems\BaseFormTags\Textarea::class);
+        LAFormItem::register('select', PackageFormItems\BaseFormTags\Select::class);
         // LAFormItem::register('checkbox', PackageFormItems\SimpleFormItem::class);
         // LAFormItem::register('radio', PackageFormItems\SimpleFormItem::class);
     }
