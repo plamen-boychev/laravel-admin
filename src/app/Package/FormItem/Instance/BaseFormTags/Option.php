@@ -6,6 +6,9 @@ use LAdmin\Package\FormItem\Instance\SimpleFormItem;
 use LAdmin\Package\FormItem\FormItemInterface;
 use LAdmin\Package\PrintableInterface;
 
+/**
+ * @todo Add method to set option as selected
+ */
 class Option extends SimpleFormItem
 {
 
@@ -59,6 +62,36 @@ class Option extends SimpleFormItem
     public function getValue()
     {
         return $this->getAttribute('value');
+    }
+
+    /**
+     * Selected setter
+     *
+     * @param  bool
+     *
+     * @return FormItemInterface
+     */
+    public function setSelected(bool $selected) : FormItemInterface
+    {
+        if ($selected === true) {
+            $this->addAttribute('selected', 'selected');
+        } else {
+            $this->removeAttribute('selected');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Selected getter
+     *
+     * @param  null
+     *
+     * @return bool
+     */
+    public function getSelected() : bool
+    {
+        return $this->getAttribute('selected', false);
     }
 
     /**
