@@ -9,18 +9,23 @@ use LAdmin\Package\PrintableInterface;
 /**
  * @todo Add method to set option as selected
  */
-class Option extends SimpleFormItem
+class RadioButton extends SimpleFormItem
 {
 
     /**
      * {@inheritdoc}
      */
-    protected $tagName = 'option';
+    protected $tagName = 'input';
 
     /**
      * {@inheritdoc}
      */
     protected $label;
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $baseTagTemplate = '<label><input type="radio" {attributes} /> {content}</label>';
 
     /**
      * {@inheritdoc}
@@ -65,33 +70,33 @@ class Option extends SimpleFormItem
     }
 
     /**
-     * Selected setter
+     * Checked setter
      *
      * @param  bool
      *
      * @return FormItemInterface
      */
-    public function setSelected(bool $selected) : FormItemInterface
+    public function setChecked(bool $checked) : FormItemInterface
     {
-        if ($selected === true) {
-            $this->addAttribute('selected', 'selected');
+        if ($checked === true) {
+            $this->addAttribute('checked', 'checked');
         } else {
-            $this->removeAttribute('selected');
+            $this->removeAttribute('checked');
         }
 
         return $this;
     }
 
     /**
-     * Selected getter
+     * Checked getter
      *
      * @param  null
      *
      * @return bool
      */
-    public function getSelected() : bool
+    public function getChecked() : bool
     {
-        return (bool) $this->getAttribute('selected', false);
+        return (bool) $this->getAttribute('checked', false);
     }
 
     /**

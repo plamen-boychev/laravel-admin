@@ -78,7 +78,9 @@ class ComponentsRegistrationProvider extends BaseProvider
         LAFormItem::register('textarea', PackageFormItems\BaseFormTags\Textarea::class);
         LAFormItem::register('select', PackageFormItems\BaseFormTags\Select::class);
         LAFormItem::register('checkbox', PackageFormItems\BaseFormTags\Checkbox::class);
-        // LAFormItem::register('radio', PackageFormItems\SimpleFormItem::class);
+        LAFormItem::register('radio', PackageFormItems\BaseFormTags\RadioButtonSet::class);
+        // LAFormItem::register('image', PackageFormItems\SimpleFormItem::class);
+        // LAFormItem::register('images', PackageFormItems\SimpleFormItem::class);
     }
 
     /**

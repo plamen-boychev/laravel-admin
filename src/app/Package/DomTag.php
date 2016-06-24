@@ -46,6 +46,13 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
     protected $isContainerTag = true;
 
     /**
+     * @var bool
+     *
+     * Forcing the tag to render content markup
+     */
+    protected $forceGetContentMarkup = false;
+
+    /**
      * @var string|null
      *
      * If the directory is set it is used to load templates from files for it's
@@ -102,11 +109,17 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
         $templateDirectory = $this->getTemplateDirectory();
         $templateFileName  = $this->getTemplateFileName();
 
+        if (empty($templateFileName) === true && view()->exists($this->getViewFilePath()) === false)
+        {
+            $templateDirectory = null;
+        }
+
         if (empty($templateDirectory) === true && empty($templateFileName) === true) {
             return $this->getPrintable();
         } else {
             $data = $this->getTempalteData();
-            $data[$this->tagName] = $this;
+            $tagname = camel_case($this->tagName);
+            $data[$tagname] = $this;
 
             return view($this->getViewFilePath(), $data)->render();
         }
@@ -407,7 +420,10 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
         ;
 
         $markup  = implode($attributes, explode('{attributes}', $template));
-        $content = $this->isContainerTag === true ? $this->getContentMarkup() : null;
+        $content = ($this->isContainerTag || $this->forceGetContentMarkup) === true
+            ? $this->getContentMarkup()
+            : null
+        ;
 
         if (empty($content) === true && $this->shouldPrintIfNoContentMarkup() === false )
         {
