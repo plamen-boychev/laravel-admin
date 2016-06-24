@@ -211,7 +211,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @return string|null
      */
-    public function getLabel(string $label)
+    public function getLabel()
     {
         return $this->getTemplateData('label');
     }
