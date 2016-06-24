@@ -57,7 +57,7 @@ abstract class BaseButton extends SimpleFormItem
      *
      * @param  string|PrintableInterface $value
      *
-     * @return FormItemInterface
+     * @return SimpleFormItem
      *
      * @throws Exception if the passed value is not printable - either a scalar
      *         value of a PrintableInterface implementation
