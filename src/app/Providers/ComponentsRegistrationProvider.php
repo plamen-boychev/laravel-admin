@@ -67,12 +67,14 @@ class ComponentsRegistrationProvider extends BaseProvider
     {
         LAFormItem::register('simple', PackageFormItems\SimpleFormItem::class);
         LAFormItem::register('text', PackageFormItems\BaseFormTags\Text::class);
-        // LAFormItem::register('file', PackageFormItems\SimpleFormItem::class);
-        // LAFormItem::register('email', PackageFormItems\SimpleFormItem::class);
-        // LAFormItem::register('button', PackageFormItems\SimpleFormItem::class);
+        LAFormItem::register('file', PackageFormItems\BaseFormTags\File::class);
+        LAFormItem::register('email', PackageFormItems\BaseFormTags\Email::class);
+        LAFormItem::register('number', PackageFormItems\BaseFormTags\Number::class);
+        LAFormItem::register('button', PackageFormItems\BaseFormTags\Button::class);
+        LAFormItem::register('reset-button', PackageFormItems\BaseFormTags\ResetButton::class);
+        LAFormItem::register('submit-button', PackageFormItems\BaseFormTags\SubmitButton::class);
         // LAFormItem::register('datalist', PackageFormItems\SimpleFormItem::class);
-        // LAFormItem::register('tange', PackageFormItems\SimpleFormItem::class);
-        // LAFormItem::register('number', PackageFormItems\SimpleFormItem::class);
+        // LAFormItem::register('range', PackageFormItems\SimpleFormItem::class);
         // LAFormItem::register('textarea', PackageFormItems\SimpleFormItem::class);
         // LAFormItem::register('select', PackageFormItems\SimpleFormItem::class);
         // LAFormItem::register('checkbox', PackageFormItems\SimpleFormItem::class);

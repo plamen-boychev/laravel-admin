@@ -95,7 +95,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @param  null
      *
-     * @return String
+     * @return string
      */
     public function __toString() : string
     {
@@ -117,9 +117,9 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @param  string $directory
      *
-     * @return PrintableInterface
+     * @return DomTagInterface
      */
-    public function setTemplateDirectory(string $directory) : PrintableInterface
+    public function setTemplateDirectory(string $directory) : DomTagInterface
     {
         $this->requireExistingResourcePath($directory);
         $this->templateDirectory = $directory;
@@ -144,9 +144,9 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @param  array $data
      *
-     * @return PrintableInterface
+     * @return DomTagInterface
      */
-    public function setTemplateData(array $data) : PrintableInterface
+    public function setTemplateData(array $data) : DomTagInterface
     {
         $this->templateData = $data;
 
@@ -156,13 +156,64 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
     /**
      * Returns the data that would be passed to the view
      *
+     * @param  string $key
+     *
+     * @return mixed
+     */
+    public function getTempalteData(string $key = null) : array
+    {
+        if ($key !== null)
+        {
+            return isset($this->templateData[$key])
+                ? $this->templateData[$key]
+                : null
+            ;
+        }
+
+        return $this->templateData;
+    }
+
+    /**
+     * Unsetting data that would be passed to the view
+     *
+     * @param  string $key
+     *
+     * @return DomTagInterface
+     */
+    public function removeTemplateData(string $key) : DomTagInterface
+    {
+        if (isset($this->getTempalteData[$key]))
+        {
+            unset($this->getTempalteData[$key]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Setting a label - template data param, would be passed to the template
+     *
+     * @param  string $label
+     *
+     * @return DomTagInterface
+     */
+    public function setLabel(string $label)
+    {
+        $this->addTemplateData('label', $label);
+
+        return $this;
+    }
+
+    /**
+     * Getting the template data param that would be passed to the template as $label variable
+     *
      * @param  null
      *
-     * @return array
+     * @return string|null
      */
-    public function getTempalteData() : array
+    public function getLabel(string $label)
     {
-        return $this->templateData;
+        return $this->getTemplateData('label');
     }
 
     /**
@@ -181,9 +232,9 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *              (mixed) $value
      *           ] - value will be added, indexed by $key
      *
-     * @return PrintableInterface
+     * @return DomTagInterface
      */
-    public function addTemplateData(...$params) : PrintableInterface
+    public function addTemplateData(...$params) : DomTagInterface
     {
         if (empty($params))
         {
@@ -228,9 +279,9 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @param  string $path
      *
-     * @return PrintableInterface
+     * @return DomTagInterface
      */
-    public function setTemplateFileName(string $path) : PrintableInterface
+    public function setTemplateFileName(string $path) : DomTagInterface
     {
         $this->templateFileName = $path;
 
@@ -279,9 +330,9 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @param  string $directory
      *
-     * @return PrintableInterface
+     * @return DomTagInterface
      */
-    protected function requireExistingResourcePath(string $directory) : PrintableInterface
+    protected function requireExistingResourcePath(string $directory) : DomTagInterface
     {
         $fullPath = $this->existsInViews($directory);
 
@@ -300,7 +351,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @return  === true
      */
-    protected function requireExistingResourceFile(string $path) : PrintableInterface
+    protected function requireExistingResourceFile(string $path) : DomTagInterface
     {
         $phpFilePath   = $path . '.php';
         $bladeFilePath = $path . '.blade.php';
@@ -338,7 +389,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @param  null
      *
-     * @return String
+     * @return string
      */
     public function getPrintable() : string
     {
@@ -388,7 +439,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @param  null
      *
-     * @return String
+     * @return string
      */
     public function getContentMarkup() : string
     {
@@ -398,11 +449,11 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
     /**
      * Replacing all placeholders of the provided template with their contents
      *
-     * @param  String $template
+     * @param  string $template
      *
-     * @return String
+     * @return string
      */
-    protected function replaceDomPropertiesPlaceholders(String $template) : string
+    protected function replaceDomPropertiesPlaceholders(string $template) : string
     {
         $attrData = $this->attributes;
         $attributes = [];
@@ -427,7 +478,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @param  mixed $value
      *
-     * @return String
+     * @return string
      */
     protected function scalarizeTagAttribute($value) : string
     {
@@ -440,7 +491,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @param  mixed $value
      *
-     * @return String
+     * @return string
      */
     protected function scalarizeAttributeValues($value) : string
     {
@@ -455,7 +506,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @param  mixed $value
      *
-     * @return String
+     * @return string
      */
     protected function scalarizeNonScalar($value) : string
     {
@@ -503,7 +554,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @param  null
      *
-     * @return String
+     * @return string
      */
     protected function getContainerTagTemplatePrototype() : string
     {
@@ -515,7 +566,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
      *
      * @param  null
      *
-     * @return String
+     * @return string
      */
     protected function getNonContainerTagTemplatePrototype() : string
     {
@@ -525,12 +576,12 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
     /**
      * Setting an attribute's value for the Dom Tag element
      *
-     * @param  String $name
+     * @param  string $name
      * @param  mixed $value - scalar value or an array
      *
      * @return DomTagInterface
      */
-    public function addAttribute(String $name, $value) : DomTagInterface
+    public function addAttribute(string $name, $value) : DomTagInterface
     {
         $this->attributes[$name] = $value;
 
@@ -540,12 +591,12 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
     /**
      * Getting an attribute's value for the Dom Tag element
      *
-     * @param  String $name
+     * @param  string $name
      * @param  mixed $default - default value
      *
      * @return mixed
      */
-    public function getAttribute(String $name, $default = null)
+    public function getAttribute(string $name, $default = null)
     {
         if (isset($this->attributes[$name]) === false)
         {
@@ -558,11 +609,11 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
     /**
      * Removing an attribute's value for the Dom Tag element
      *
-     * @param  String $name
+     * @param  string $name
      *
      * @return mixed
      */
-    public function removeAttribute(String $name, $default = null) : DomTagInterface
+    public function removeAttribute(string $name, $default = null) : DomTagInterface
     {
         if (isset($this->attributes[$name]))
         {
@@ -575,7 +626,7 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
     /**
      * Adding a class to the Dom Tag element
      *
-     * @param  String $class
+     * @param  string $class
      *
      * @return DomTagInterface
      */
@@ -611,11 +662,11 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
     /**
      * Removes a class from the set ones if such exists
      *
-     * @param  String $class
+     * @param  string $class
      *
      * @return
      */
-    public function removeClass(String $class) : DomTagInterface
+    public function removeClass(string $class) : DomTagInterface
     {
         if (isset($this->attributes['class']) === false)
         {
@@ -637,13 +688,47 @@ abstract class DomTag implements DomTagInterface, PrintableInterface
     /**
      * Setting id attribute for the Dom Tag element
      *
-     * @param  String $id
+     * @param  string $id
      *
      * @return DomTagInterface
      */
-    public function setId(String $id) : DomTagInterface
+    public function setId(string $id) : DomTagInterface
     {
-        $this->attributes['id'] = $id;
+        $this->addAttribute('id', $id);
+
+        return $this;
+    }
+
+    /**
+     * Setting id attribute for the Dom Tag element
+     *
+     * @param  string
+     *
+     * @return string|null
+     */
+    public function getId()
+    {
+        return $this->getAttribute('id');
+    }
+
+    /**
+     * Generating a unique id for the tag and setting it if there is no id attribute passed
+     *
+     * @param  null
+     *
+     * @return DomTagInterface
+     */
+    public function generateIdIfNotSet() : DomTagInterface
+    {
+        $hasId = (boolean) $this->getId();
+
+        if ($hasId === true)
+        {
+            return $this;
+        }
+
+        $id = uniqid();
+        $this->setId($id);
 
         return $this;
     }
