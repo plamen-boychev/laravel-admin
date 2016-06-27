@@ -4,6 +4,7 @@ namespace LAdmin\Package\FormItem\Instance\BaseFormTags;
 
 use LAdmin\Package\FormItem\Instance\SimpleFormItem;
 use LAdmin\Package\PrintableInterface;
+use LAdmin\Package\DomTagInterface;
 
 /**
  * @todo Specify a checked option from the group
@@ -32,6 +33,13 @@ class RadioButtonSet extends SimpleFormItem
     protected $options;
 
     /**
+     * @var Array
+     *
+     * Template name for the options
+     */
+    protected $optionsTemplate;
+
+    /**
      * {@inheritdoc}
      */
     protected $forceGetContentMarkup = true;
@@ -58,6 +66,35 @@ class RadioButtonSet extends SimpleFormItem
      */
     public function stringifyOptions() : string
     {
+        $options = $this->options;
+        $currentOption = current($options);
+
+        if ($currentOption instanceof RadioButton) {
+            $this->options = $options;
+        } else {
+            $optionInstances = [];
+            $name = $this->getName();
+            foreach ($options as $key => $value)
+            {
+                $option = new RadioButton;
+                $option->setValue($key);
+                $option->setLabel($value);
+                $option->setName($name);
+                if (((string) $this->getValue()) === ((string) $key))
+                {
+                    $option->setChecked(true);
+                }
+
+                $optionInstances[$key] = $option;
+            }
+            $this->options = $optionInstances;
+        }
+
+        if ($this->optionsTemplate !== null)
+        {
+            $this->setOptionsTemplate($this->optionsTemplate);
+        }
+
         $options = [];
 
         foreach ($this->options as $key => $value)
@@ -73,33 +110,36 @@ class RadioButtonSet extends SimpleFormItem
     /**
      * Options setter
      *
-     * @param  array $options
+     * @param  array  $options
+     * @param  string $templateName
      *
-     * @return Select
+     * @return DomTagInterface
      */
-    public function setOptions(array $options)
+    public function setOptions(array $options, string $templateName = null) : DomTagInterface
     {
-        $currentOption = current($options);
+        $this->options = $options;
+        $this->optionsTemplate = $templateName;
 
-        if ($currentOption instanceof RadioButton) {
-            $this->options = $options;
-        } else {
-            $optionInstances = [];
-            $name = $this->getName();
-            foreach ($options as $key => $value)
-            {
-                $option = new RadioButton;
-                $option->setValue($key);
-                $option->setLabel($value);
-                $option->setName($name);
-                if (((string) $this->getValue()) === ((string) $value))
-                {
-                    $options->setChecked(true);
-                }
+        return $this;
+    }
 
-                $optionInstances[$key] = $option;
-            }
-            $this->options = $optionInstances;
+    /**
+     * Setting all registered options a template
+     *
+     * @param  string $templateName
+     *
+     * @return DomTagInterface
+     */
+    public function setOptionsTemplate(string $templateName) : DomTagInterface
+    {
+        $templateDirectory = $this->getTemplateDirectory() ?? null;
+
+        foreach ($this->options as $index => $option)
+        {
+            $this->options[$index]
+                ->setTemplateFileName($templateName)
+                ->setTemplateDirectory($templateDirectory)
+            ;
         }
 
         return $this;
@@ -122,12 +162,12 @@ class RadioButtonSet extends SimpleFormItem
      *
      * @param  string|PrintableInterface $value
      *
-     * @return SimpleFormItem
+     * @return DomTagInterface
      *
      * @throws Exception if the passed value is not printable - either a scalar
      *         value of a PrintableInterface implementation
      */
-    public function setValue($value) : SimpleFormItem
+    public function setValue($value) : DomTagInterface
     {
         $this->value = $value;
 
